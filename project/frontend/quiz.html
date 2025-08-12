@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz - AI Math Learning</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: white;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .quiz-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .quiz-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .progress-bar {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      height: 10px;
+      margin: 1rem 0;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      background: #4CAF50;
+      height: 100%;
+      border-radius: 25px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+    
+    .quiz-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .question-number {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    
+    .difficulty-badge {
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    
+    .difficulty-easy { background: #4CAF50; }
+    .difficulty-medium { background: #FF9800; }
+    .difficulty-hard { background: #f44336; }
+    
+    .question-text {
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+    
+    .answer-input {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.1rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      margin-bottom: 1rem;
+    }
+    
+    .answer-input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .answer-input:focus {
+      outline: none;
+      border-color: #4CAF50;
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .quiz-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 12px 25px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+    }
+    
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .feedback {
+      margin-top: 1rem;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+    }
+    
+    .feedback.correct {
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid #4CAF50;
+    }
+    
+    .feedback.incorrect {
+      background: rgba(244, 67, 54, 0.2);
+      border: 1px solid #f44336;
+    }
+    
+    .hidden { display: none; }
+    
+    .completion-screen {
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    .completion-screen h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .score-display {
+      font-size: 1.5rem;
+      margin: 1rem 0;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="quiz-header">
+      <h1 id="quizTitle">Math Quiz</h1>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div id="progressText">Question 1 of 5</div>
+    </div>
+
+    <!-- Quiz Question -->
+    <div id="quizBox" class="quiz-card">
+      <div class="question-header">
+        <div class="question-number" id="questionNumber">Q1</div>
+        <div class="difficulty-badge" id="difficultyBadge">Easy</div>
+      </div>
+      
+      <div class="question-text" id="question">Loading question...</div>
+      
+      <input type="text" id="answerInput" class="answer-input" placeholder="Enter your answer" />
+      
+      <div class="quiz-buttons">
+        <button id="submitBtn" class="btn btn-primary">Submit Answer</button>
+        <a href="index.html" class="btn btn-secondary">← Back to Topics</a>
+      </div>
+      
+      <div id="feedback" class="feedback hidden"></div>
+      
+      <div class="quiz-buttons hidden" id="nextButtonContainer">
+        <button id="nextBtn" class="btn btn-primary">Next Question</button>
+      </div>
+    </div>
+
+    <!-- Completion Screen -->
+    <div id="completionScreen" class="quiz-card completion-screen hidden">
+      <h2>🎉 Quiz Complete!</h2>
+      <div class="score-display" id="scoreDisplay">
+        You got 0 out of 5 questions correct!
+      </div>
+      <div class="quiz-buttons">
+        <a href="index.html" class="btn btn-primary">Try Another Topic</a>
+        <button id="retryBtn" class="btn btn-secondary">Retry This Topic</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const studentId = "4"; // Hardcoded for now
+  let currentTopic = "";
+  let currentQuestion = null;
+  let currentQuestionIndex = 0;
+  let correctCount = 0;
+  let servedQuestionIds = [];
+  const maxQuestions = 5;
+
+  const quizBox = document.getElementById("quizBox");
+  const questionEl = document.getElementById("question");
+  const answerInput = document.getElementById("answerInput");
+  const submitBtn = document.getElementById("submitBtn");
+  const feedbackEl = document.getElementById("feedback");
+  const nextBtn = document.getElementById("nextBtn");
+  const nextButtonContainer = document.getElementById("nextButtonContainer");
+  const completionScreen = document.getElementById("completionScreen");
+  const progressFill = document.getElementById("progressFill");
+  const progressText = document.getElementById("progressText");
+  const questionNumber = document.getElementById("questionNumber");
+  const difficultyBadge = document.getElementById("difficultyBadge");
+
+  // Get topic from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const topicParam = urlParams.get('topic');
+  
+  if (topicParam) {
+    // Convert URL format to API format (must match exactly with quiz_data.py keys)
+    const topicMap = {
+      'fractions': 'Fractions',
+      'decimals': 'Decimals', 
+      'angles': 'Angles',
+      'multi-digit-multiplication': 'Multi-digit Multiplication',
+      'ratios-and-proportional-relationships': 'Ratios and Proportional Relationships',
+      'statistics': 'Statistics'
+    };
+    
+    currentTopic = topicMap[topicParam] || topicParam;
+    console.log("Selected topic:", currentTopic); // Debug log
+    document.getElementById('quizTitle').textContent = `${currentTopic} Quiz`;
+    
+    // Start the quiz
+    loadQuestion(currentTopic);
+  } else {
+    questionEl.textContent = "No topic selected. Please go back and select a topic.";
+  }
+
+  async function loadQuestion(topic) {
+    console.log("Loading question for topic:", topic); // Debug log
+    
+    const response = await fetch(`http://127.0.0.1:8000/next-question/${studentId}/${topic}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(servedQuestionIds)
+    });
+
+    console.log("Response status:", response.status); // Debug log
+
+    if (!response.ok) {
+      console.error("Failed to load question:", response.status);
+      const errorText = await response.text();
+      console.error("Error details:", errorText);
+      questionEl.textContent = "⚠️ Failed to load question. Check console for details.";
+      return;
+    }
+
+    const data = await response.json();
+    console.log("Question data received:", data); // Debug log
+    
+    if (data.question === "No more questions available.") {
+      questionEl.textContent = "No questions available for this topic.";
+      return;
+    }
+    
+    currentQuestion = data;
+    servedQuestionIds.push(String(data.id));
+    
+    // Update UI
+    questionEl.textContent = data.question;
+    questionNumber.textContent = `Q${currentQuestionIndex + 1}`;
+    
+    // Update difficulty badge
+    const difficulty = data.difficulty.toLowerCase();
+    difficultyBadge.textContent = data.difficulty;
+    difficultyBadge.className = `difficulty-badge difficulty-${difficulty}`;
+    
+    // Update progress
+    const progress = ((currentQuestionIndex + 1) / maxQuestions) * 100;
+    progressFill.style.width = `${progress}%`;
+    progressText.textContent = `Question ${currentQuestionIndex + 1} of ${maxQuestions}`;
+  }
+
+  submitBtn.addEventListener("click", async (event) => {
+    event.preventDefault();
+    const userAnswer = answerInput.value.trim();
+
+    const payload = {
+      student_id: studentId,
+      topic: currentTopic,
+      question_id: currentQuestion.id,
+      answer: userAnswer,
+    };
+
+    console.log("Submitting:", payload);
+
+    const response = await fetch("http://127.0.0.1:8000/check-answer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+    console.log("Received response:", result);
+
+    if (result.is_correct) {
+      feedbackEl.textContent = "✅ Correct!";
+      feedbackEl.className = "feedback correct";
+      correctCount++;
+    } else {
+      let feedbackText = "❌ Incorrect.";
+      if (result.message) {
+        feedbackText += ` Hint: ${result.message}`;
+      }
+      feedbackEl.textContent = feedbackText;
+      feedbackEl.className = "feedback incorrect";
+    }
+    
+    feedbackEl.classList.remove("hidden");
+    submitBtn.classList.add("hidden");
+    nextButtonContainer.classList.remove("hidden");
+  });
+
+  nextBtn.addEventListener("click", async () => {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < maxQuestions) {
+      await loadQuestion(currentTopic);
+      feedbackEl.classList.add("hidden");
+      nextButtonContainer.classList.add("hidden");
+      answerInput.value = "";
+      submitBtn.classList.remove("hidden");
+    } else {
+      // Show completion screen
+      quizBox.classList.add("hidden");
+      completionScreen.classList.remove("hidden");
+      document.getElementById("scoreDisplay").textContent = 
+        `You got ${correctCount} out of ${maxQuestions} questions correct!`;
+    }
+  });
+
+  // Retry button functionality
+  document.getElementById("retryBtn").addEventListener("click", () => {
+    // Reset quiz state
+    currentQuestionIndex = 0;
+    correctCount = 0;
+    servedQuestionIds = [];
+    
+    // Show quiz again
+    completionScreen.classList.add("hidden");
+    quizBox.classList.remove("hidden");
+    feedbackEl.classList.add("hidden");
+    nextButtonContainer.classList.add("hidden");
+    submitBtn.classList.remove("hidden");
+    answerInput.value = "";
+    
+    // Load first question
+    loadQuestion(currentTopic);
+  });
+
+  // Allow Enter key to submit
+  answerInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && !submitBtn.classList.contains("hidden")) {
+      submitBtn.click();
+    }
+  });
+</script>
+</body>
+</html>
